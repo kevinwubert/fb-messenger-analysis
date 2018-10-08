@@ -24,7 +24,7 @@ func Main() error {
 
 	analysis := message.AnalyzeMessages(messageBlob)
 	sortedAnalysis := message.SortAnalysis(analysis)
-	fmt.Println(analysis)
+	fmt.Println(sortedAnalysis.SortedParticipantAnalyses["Kevin Wu"])
 
 	fmt.Println("Starting Facebook Messenger Analysis server...")
 	http.HandleFunc("/graph/", visualizer.DrawPieChartHandler)
