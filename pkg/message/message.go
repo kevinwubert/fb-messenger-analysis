@@ -184,16 +184,23 @@ func AnalyzeMessage(a *Analysis, m Message) error {
 		return nil
 	}
 	if m.Sticker != nil {
-		if _, ok := a.Stickers[m.Sticker.URI]; ok {
-			a.Stickers[m.Sticker.URI]++
-		} else {
-			a.Stickers[m.Sticker.URI] = 1
+		stickerID := strings.Split(m.Sticker.URI, "_n_")[1]
+		stickerID = strings.Split(stickerID, ".")[0]
+
+		if stickerID == "369239263222822" {
+			return nil
 		}
 
-		if _, ok := a.ParticipantAnalyses[m.SenderName].Stickers[m.Sticker.URI]; ok {
-			a.ParticipantAnalyses[m.SenderName].Stickers[m.Sticker.URI]++
+		if _, ok := a.Stickers[stickerID]; ok {
+			a.Stickers[stickerID]++
 		} else {
-			a.ParticipantAnalyses[m.SenderName].Stickers[m.Sticker.URI] = 1
+			a.Stickers[stickerID] = 1
+		}
+
+		if _, ok := a.ParticipantAnalyses[m.SenderName].Stickers[stickerID]; ok {
+			a.ParticipantAnalyses[m.SenderName].Stickers[stickerID]++
+		} else {
+			a.ParticipantAnalyses[m.SenderName].Stickers[stickerID] = 1
 		}
 
 		return nil
@@ -261,7 +268,7 @@ func (s StringFreqs) Swap(i, j int) {
 }
 
 func (s StringFreqs) Less(i, j int) bool {
-	return s[i].Freq < s[j].Freq
+	return s[i].Freq > s[j].Freq
 }
 
 // SortedAnalysis contains the aggregate analysis with the fields sorted

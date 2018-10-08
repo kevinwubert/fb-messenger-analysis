@@ -21,13 +21,16 @@ func Main() error {
 	if err != nil {
 		return errors.Wrap(err, "failed to parse messages")
 	}
-
+	fmt.Println("analyzing messages...")
 	analysis := message.AnalyzeMessages(messageBlob)
 	sortedAnalysis := message.SortAnalysis(analysis)
-	fmt.Println(sortedAnalysis.SortedParticipantAnalyses["Kevin Wu"])
+	fmt.Println("finished analyzing messages...")
+	fmt.Println("starting facebook messenger analysis server...")
 
-	fmt.Println("Starting Facebook Messenger Analysis server...")
-	http.HandleFunc("/graph/", visualizer.DrawPieChartHandler)
+	visualizerClient := visualizer.New(sortedAnalysis)
+	http.HandleFunc("/graph", visualizerClient.DrawBarGraphHandler)
+	http.HandleFunc("/topSticker", visualizerClient.TopStickerHandler)
+	http.HandleFunc("/getNames", visualizerClient.GetNamesHandler)
 
 	err = http.ListenAndServe(":8080", nil)
 	return err
