@@ -89,6 +89,7 @@ func (c client) DrawBarGraphHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", "image/png")
+	w.Header().Set("Access-Control-Allow-Origin", "*")
 	err = bc.Render(chart.PNG, w)
 
 	if err != nil {
@@ -187,6 +188,7 @@ func (c client) GetNamesHandler(w http.ResponseWriter, r *http.Request) {
 		names = append(names, k)
 	}
 
+	w.Header().Set("Access-Control-Allow-Origin", "*")
 	WriteJSONResponse(w, names)
 }
 
