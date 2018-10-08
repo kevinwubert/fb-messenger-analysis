@@ -2,7 +2,9 @@ package message
 
 import (
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
+	"regexp"
 	"strings"
 
 	"github.com/pkg/errors"
@@ -57,6 +59,31 @@ func ParseMessages(filepath string) (Blob, error) {
 	return b, nil
 }
 
+// StringFreq is a struct with a Value and its Frequency
+type StringFreq struct {
+	Value string
+	Freq  int
+}
+
+// SortedAnalysis contains the aggregate analysis with the fields sorted
+type SortedAnalysis struct {
+	ParticipantAnalyses []*SortedParticipantAnalysis
+	Stickers            []StringFreq
+	Words               []StringFreq
+	Reactions           []StringFreq
+	Mentions            []StringFreq
+	MessageCount        int
+}
+
+// SortedParticipantAnalysis contains the sorted values of participants
+type SortedParticipantAnalysis struct {
+	Stickers     []StringFreq
+	Words        []StringFreq
+	Reactions    []StringFreq
+	Mentions     []StringFreq
+	MessageCount int
+}
+
 // Analysis contains the aggregate analysis and a map
 // for participant to participant anaylsis
 type Analysis struct {
@@ -64,6 +91,7 @@ type Analysis struct {
 	Stickers            map[string]int
 	Words               map[string]int
 	Reactions           map[string]int
+	Mentions            map[string]int
 	MessageCount        int
 }
 
@@ -73,8 +101,8 @@ type ParticipantAnalysis struct {
 	Stickers     map[string]int
 	Words        map[string]int
 	Reactions    map[string]int
+	Mentions     map[string]int
 	MessageCount int
-	MentionCount int
 }
 
 func newParticipantAnalysis() *ParticipantAnalysis {
@@ -82,8 +110,8 @@ func newParticipantAnalysis() *ParticipantAnalysis {
 		Stickers:     make(map[string]int),
 		Words:        make(map[string]int),
 		Reactions:    make(map[string]int),
+		Mentions:     make(map[string]int),
 		MessageCount: 0,
-		MentionCount: 0,
 	}
 }
 
@@ -93,6 +121,7 @@ func newAnalysis() Analysis {
 		Stickers:            make(map[string]int),
 		Words:               make(map[string]int),
 		Reactions:           make(map[string]int),
+		Mentions:            make(map[string]int),
 		MessageCount:        0,
 	}
 }
@@ -105,14 +134,17 @@ func AnalyzeMessages(b Blob) Analysis {
 	}
 
 	for _, m := range b.Messages {
-		AnalyzeMessage(&a, m)
+		err := AnalyzeMessage(&a, m)
+		if err != nil {
+			fmt.Printf("analyzing message failed: %v", err)
+		}
 	}
 
 	return a
 }
 
 // AnalyzeMessage processes a single message and changes the analysis
-func AnalyzeMessage(a *Analysis, m Message) {
+func AnalyzeMessage(a *Analysis, m Message) error {
 	if m.Reactions != nil {
 		for _, r := range *m.Reactions {
 			if _, ok := a.Reactions[r.Reaction]; ok {
@@ -133,13 +165,70 @@ func AnalyzeMessage(a *Analysis, m Message) {
 	a.ParticipantAnalyses[m.SenderName].MessageCount++
 
 	if strings.Contains(m.Content, "sent a photo.") {
-		return
+		return nil
 	}
 	if strings.Contains(m.Content, "sent an attachment.") {
-		return
+		return nil
 	}
 	if strings.Contains(m.Content, "sent a sticker.") {
-		a.Stickers()
-		return
+		if _, ok := a.Stickers[m.Sticker.URI]; ok {
+			a.Stickers[m.Sticker.URI]++
+		} else {
+			a.Stickers[m.Sticker.URI] = 1
+		}
+
+		if _, ok := a.ParticipantAnalyses[m.SenderName].Stickers[m.Sticker.URI]; ok {
+			a.ParticipantAnalyses[m.SenderName].Stickers[m.Sticker.URI]++
+		} else {
+			a.ParticipantAnalyses[m.SenderName].Stickers[m.Sticker.URI] = 1
+		}
+
+		return nil
 	}
+
+	reg, err := regexp.Compile("[^a-zA-Z0-9@]+")
+	if err != nil {
+		return errors.Wrap(err, "regex failed to compile")
+	}
+	words := reg.Split(strings.ToLower(m.Content), -1)
+	for _, word := range words {
+		if len(word) == 0 {
+			continue
+		}
+
+		if word[0] == '@' && len(word) > 1 {
+			if _, ok := a.Mentions[word]; ok {
+				a.Mentions[word]++
+			} else {
+				a.Mentions[word] = 1
+			}
+
+			if _, ok := a.ParticipantAnalyses[m.SenderName].Mentions[word]; ok {
+				a.ParticipantAnalyses[m.SenderName].Mentions[word]++
+			} else {
+				a.ParticipantAnalyses[m.SenderName].Mentions[word] = 1
+			}
+		}
+
+		if _, ok := a.Words[word]; ok {
+			a.Words[word]++
+		} else {
+			a.Words[word] = 1
+		}
+
+		if _, ok := a.ParticipantAnalyses[m.SenderName].Words[word]; ok {
+			a.ParticipantAnalyses[m.SenderName].Words[word]++
+		} else {
+			a.ParticipantAnalyses[m.SenderName].Words[word] = 1
+		}
+	}
+
+	return nil
+}
+
+// SortAnalysis returns the sorted analysis which each map sorted
+func SortAnalysis(a Analysis) SortedAnalysis {
+	s := SortedAnalysis{}
+
+	return s
 }

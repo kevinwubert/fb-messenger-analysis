@@ -22,7 +22,9 @@ func Main() error {
 		return errors.Wrap(err, "failed to parse messages")
 	}
 
-	fmt.Println(messageFilepath)
+	analysis := message.AnalyzeMessages(messageBlob)
+	sortedAnalysis := message.SortAnalysis(analysis)
+	fmt.Println(analysis)
 
 	fmt.Println("Starting Facebook Messenger Analysis server...")
 	http.HandleFunc("/graph/", visualizer.DrawPieChartHandler)
