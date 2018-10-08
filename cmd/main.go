@@ -1,7 +1,14 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+
+	"github.com/kevinwubert/fb-messenger-analysis/pkg/server"
+)
 
 func main() {
-	fmt.Println("Hello World")
+	err := server.Main()
+	if err != nil {
+		fmt.Printf("server errored: %v", err)
+	}
 }
