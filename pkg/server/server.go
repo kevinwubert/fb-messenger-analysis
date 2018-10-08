@@ -1,12 +1,13 @@
 package server
 
 import (
-	"errors"
 	"fmt"
 	"net/http"
 	"os"
 
+	"github.com/kevinwubert/fb-messenger-analysis/pkg/message"
 	"github.com/kevinwubert/fb-messenger-analysis/pkg/visualizer"
+	"github.com/pkg/errors"
 )
 
 func Main() error {
@@ -16,11 +17,16 @@ func Main() error {
 	}
 
 	messageFilepath := os.Args[1]
+	messageBlob, err := message.ParseMessages(messageFilepath)
+	if err != nil {
+		return errors.Wrap(err, "failed to parse messages")
+	}
+
 	fmt.Println(messageFilepath)
 
 	fmt.Println("Starting Facebook Messenger Analysis server...")
 	http.HandleFunc("/graph/", visualizer.DrawPieChartHandler)
 
-	err := http.ListenAndServe(":8080", nil)
+	err = http.ListenAndServe(":8080", nil)
 	return err
 }

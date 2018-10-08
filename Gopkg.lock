@@ -13,6 +13,14 @@
   revision = "e2365dfdc4a05e4b8299a783240d4a7d5a65d4e4"
 
 [[projects]]
+  digest = "1:40e195917a951a8bf867cd05de2a46aaf1806c50cf92eebf4c16f78cd196f747"
+  name = "github.com/pkg/errors"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "645ef00459ed84a119197bfb8d8205042c6df63d"
+  version = "v0.8.0"
+
+[[projects]]
   digest = "1:cf762a0ce01d48d8ac03f717aa41f66b655abea67c616d89994ce091a2cc6831"
   name = "github.com/wcharczuk/go-chart"
   packages = [
@@ -43,6 +51,9 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  input-imports = ["github.com/wcharczuk/go-chart"]
+  input-imports = [
+    "github.com/pkg/errors",
+    "github.com/wcharczuk/go-chart",
+  ]
   solver-name = "gps-cdcl"
   solver-version = 1

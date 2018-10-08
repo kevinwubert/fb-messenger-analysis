@@ -9,6 +9,6 @@ import (
 func main() {
 	err := server.Main()
 	if err != nil {
-		fmt.Printf("server errored: %v", err)
+		fmt.Printf("server errored: %v\n", err)
 	}
 }
