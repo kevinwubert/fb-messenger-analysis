@@ -140,7 +140,8 @@ func newAnalysis() Analysis {
 }
 
 func nameToFirstName(s string) string {
-	return strings.Split(s, " ")[0]
+	firstName := strings.Split(s, " ")[0]
+	return firstName
 }
 
 // AnalyzeMessages analyzes the message blob and returns the results
@@ -170,16 +171,16 @@ func AnalyzeMessage(a *Analysis, m Message) error {
 				a.Reactions[r.Reaction] = 1
 			}
 
-			if _, ok := a.ParticipantAnalyses[r.Actor].Reactions[r.Reaction]; ok {
-				a.ParticipantAnalyses[r.Actor].Reactions[r.Reaction]++
+			if _, ok := a.ParticipantAnalyses[nameToFirstName(r.Actor)].Reactions[r.Reaction]; ok {
+				a.ParticipantAnalyses[nameToFirstName(r.Actor)].Reactions[r.Reaction]++
 			} else {
-				a.ParticipantAnalyses[r.Actor].Reactions[r.Reaction] = 1
+				a.ParticipantAnalyses[nameToFirstName(r.Actor)].Reactions[r.Reaction] = 1
 			}
 		}
 	}
 
 	a.MessageCount++
-	a.ParticipantAnalyses[m.SenderName].MessageCount++
+	a.ParticipantAnalyses[nameToFirstName(m.SenderName)].MessageCount++
 
 	if strings.Contains(m.Content, "sent a photo.") {
 		return nil
@@ -201,10 +202,10 @@ func AnalyzeMessage(a *Analysis, m Message) error {
 			a.Stickers[stickerID] = 1
 		}
 
-		if _, ok := a.ParticipantAnalyses[m.SenderName].Stickers[stickerID]; ok {
-			a.ParticipantAnalyses[m.SenderName].Stickers[stickerID]++
+		if _, ok := a.ParticipantAnalyses[nameToFirstName(m.SenderName)].Stickers[stickerID]; ok {
+			a.ParticipantAnalyses[nameToFirstName(m.SenderName)].Stickers[stickerID]++
 		} else {
-			a.ParticipantAnalyses[m.SenderName].Stickers[stickerID] = 1
+			a.ParticipantAnalyses[nameToFirstName(m.SenderName)].Stickers[stickerID] = 1
 		}
 
 		return nil
@@ -231,10 +232,10 @@ func AnalyzeMessage(a *Analysis, m Message) error {
 				a.Mentions[word] = 1
 			}
 
-			if _, ok := a.ParticipantAnalyses[m.SenderName].Mentions[word]; ok {
-				a.ParticipantAnalyses[m.SenderName].Mentions[word]++
+			if _, ok := a.ParticipantAnalyses[nameToFirstName(m.SenderName)].Mentions[word]; ok {
+				a.ParticipantAnalyses[nameToFirstName(m.SenderName)].Mentions[word]++
 			} else {
-				a.ParticipantAnalyses[m.SenderName].Mentions[word] = 1
+				a.ParticipantAnalyses[nameToFirstName(m.SenderName)].Mentions[word] = 1
 			}
 		}
 
@@ -244,10 +245,10 @@ func AnalyzeMessage(a *Analysis, m Message) error {
 			a.Words[word] = 1
 		}
 
-		if _, ok := a.ParticipantAnalyses[m.SenderName].Words[word]; ok {
-			a.ParticipantAnalyses[m.SenderName].Words[word]++
+		if _, ok := a.ParticipantAnalyses[nameToFirstName(m.SenderName)].Words[word]; ok {
+			a.ParticipantAnalyses[nameToFirstName(m.SenderName)].Words[word]++
 		} else {
-			a.ParticipantAnalyses[m.SenderName].Words[word] = 1
+			a.ParticipantAnalyses[nameToFirstName(m.SenderName)].Words[word] = 1
 		}
 	}
 
