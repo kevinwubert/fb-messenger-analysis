@@ -76,7 +76,8 @@ func (c client) DrawBarGraphHandler(w http.ResponseWriter, r *http.Request) {
 			},
 		},
 		Height:   512,
-		BarWidth: 60,
+		Width:    2048,
+		BarWidth: 40,
 		XAxis: chart.Style{
 			Show: true,
 		},
@@ -158,6 +159,16 @@ func (c client) TopStickerHandler(w http.ResponseWriter, r *http.Request) {
 		WriteErrorResponse(w, errors.New("no name query"))
 		return
 	}
+	var place int
+	var err error
+	if _, ok := query["place"]; !ok {
+		place = 0
+	} else {
+		place, err = strconv.Atoi(query["place"][0])
+		if err != nil {
+			place = 0
+		}
+	}
 
 	name := query["name"][0]
 
@@ -171,13 +182,12 @@ func (c client) TopStickerHandler(w http.ResponseWriter, r *http.Request) {
 
 	var stickerID string
 	if name == "everyone" {
-		stickerID = c.SortedAnalysis.Stickers[0].Value
+		stickerID = c.SortedAnalysis.Stickers[place-1].Value
 	} else {
-		stickerID = c.SortedAnalysis.SortedParticipantAnalyses[name].Stickers[0].Value
+		stickerID = c.SortedAnalysis.SortedParticipantAnalyses[name].Stickers[place-1].Value
 	}
 
 	url := "https://messenger.com/stickers/asset/?sticker_id=" + stickerID
-	fmt.Println(url)
 	http.Redirect(w, r, url, http.StatusSeeOther)
 }
 
