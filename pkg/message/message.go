@@ -139,11 +139,15 @@ func newAnalysis() Analysis {
 	}
 }
 
+func nameToFirstName(s string) string {
+	return strings.Split(s, " ")[0]
+}
+
 // AnalyzeMessages analyzes the message blob and returns the results
 func AnalyzeMessages(b Blob) Analysis {
 	a := newAnalysis()
 	for _, p := range b.Participants {
-		a.ParticipantAnalyses[p.Name] = newParticipantAnalysis()
+		a.ParticipantAnalyses[nameToFirstName(p.Name)] = newParticipantAnalysis()
 	}
 
 	for _, m := range b.Messages {
