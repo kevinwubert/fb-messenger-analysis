@@ -162,11 +162,11 @@ func (c client) TopStickerHandler(w http.ResponseWriter, r *http.Request) {
 	var place int
 	var err error
 	if _, ok := query["place"]; !ok {
-		place = 0
+		place = 1
 	} else {
 		place, err = strconv.Atoi(query["place"][0])
 		if err != nil {
-			place = 0
+			place = 1
 		}
 	}
 
